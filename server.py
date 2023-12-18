@@ -2,6 +2,8 @@ from typing import List, TypedDict
 
 from flask import Flask, request
 
+import blockchain as bc
+
 
 class TxnData(TypedDict):
     sender: str
@@ -9,10 +11,16 @@ class TxnData(TypedDict):
     amount: int
 
 
-node = Flask(__name__)  # creating a new Flask class called node
+# initialise our node
+node = Flask(__name__)
 
 # this node stores a list of txns
-this_node_txns: List[TypedDict] = []
+this_node_txns: List[TypedDict] = []  # TODO think about moving this inside the function
+miner_address = "random-miner-address-69-420"
+
+# initialise our SmolCoin
+SmolCoin_blockchain = [bc.create_genesis_block()]
+prior_block = SmolCoin_blockchain[0]
 
 
 @node.route("/txn", methods=["POST"])
@@ -33,6 +41,14 @@ def transaction() -> str:
     print(f"to {amount}")
 
     return "confirmed\n"
+
+
+@node.route("/mine", methods=["GET"])  # TODO: create the mine endpoint
+def mine():
+    last_block = SmolCoin_blockchain[len(SmolCoin_blockchain) - 1]
+    last_proof = last_block
+
+    return "Done mining\n"
 
 
 node.run()

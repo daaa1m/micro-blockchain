@@ -1,10 +1,16 @@
 import hashlib as hasher
 from datetime import datetime
+from typing import TypedDict
+
+
+class BlockData(TypedDict):
+    proof: int
+    transactions: str
 
 
 class Block:
     def __init__(
-        self, index: int, time_stamp: datetime, data: str, prior_hash: str
+        self, index: int, time_stamp: datetime, data: BlockData, prior_hash: str
     ) -> None:
         self.index = index
         self.time_stamp = time_stamp
@@ -12,12 +18,17 @@ class Block:
         self.prior_hash = prior_hash
         self.hash = self.hash_block()
 
+    def data_to_str(self) -> str:
+        return ", ".join(f"{value}" for value in self.data.items())
+
     def hash_block(self) -> str:
+        def data_to_str(self) -> str:
+            return ", ".join(f"{value}" for value in self.data.items())
+
+        data_as_str = data_to_str(self)
+
         phrase = (
-            str(self.index)
-            + str(self.time_stamp)
-            + str(self.data)
-            + str(self.prior_hash)
+            str(self.index) + str(self.time_stamp) + data_as_str + str(self.prior_hash)
         )
         sha = hasher.sha256()
         sha.update(phrase.encode())
@@ -26,23 +37,32 @@ class Block:
 
 
 def create_genesis_block() -> Block:
-    return Block(0, datetime.now(), "SBF is guilty", "0")
+    return Block(0, datetime.now(), {"proof": 6, "transactions": ""}, "")
+
+
+prime = create_genesis_block()
+
+
+def proof_of_work(prior_proof: int) -> int:
+    incrementor = prior_proof + 1
+
+    # keep incrementing until the incrementor is divisible by 7 and prior proof
+    while not (incrementor % 7 == 0 and incrementor % prior_proof == 0):
+        incrementor += 1
+
+    return incrementor
 
 
 def create_next_block(last_block: Block) -> Block:
-    data = f"i am block {last_block.index + 1}"
-    return Block(last_block.index + 1, datetime.now(), data, last_block.hash)
+    prior_proof = last_block.data["proof"]
+    prior_txn = last_block.data["transactions"]
 
+    next_proof = 0
+    next_txn = ""
 
-# init the blockchain
-blockchain = [create_genesis_block()]
-prior_block = blockchain[0]
+    data = {"proof": next_proof, "transactions": next_txn}
 
-for i in range(1, 25):
-    prior_block = blockchain[i - 1]
-    new_block = Block(i, datetime.now(), f"i am index number {i}", prior_block.hash)
-    blockchain.append(new_block)
-    print(f"Block {new_block.index} has been added to the blockchain!")
-    print(f"Hash: {new_block.hash}")
-
-# TODO create a server using Flask
+    data_proof = proof_of_work(prior_proof)
+    return Block(
+        last_block.index + 1, datetime.now(), new_data, last_block.hash
+    )  # TODO: new block
