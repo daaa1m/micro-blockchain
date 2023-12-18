@@ -13,14 +13,14 @@ class Block:
         self.hash = self.hash_block()
 
     def hash_block(self) -> str:
-        encoded_phrase = (
+        phrase = (
             str(self.index)
             + str(self.time_stamp)
             + str(self.data)
             + str(self.prior_hash)
         )
         sha = hasher.sha256()
-        sha.update(bytes(encoded_phrase, "utf-8"))
+        sha.update(phrase.encode())
 
         return sha.hexdigest()
 
