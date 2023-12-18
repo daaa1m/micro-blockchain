@@ -3,9 +3,15 @@ from datetime import datetime
 from typing import TypedDict
 
 
+class TxnData(TypedDict):
+    sender: str
+    recipient: str
+    amount: int
+
+
 class BlockData(TypedDict):
     proof: int
-    transactions: str
+    transactions: list[TxnData]
 
 
 class Block:
@@ -37,10 +43,9 @@ class Block:
 
 
 def create_genesis_block() -> Block:
-    return Block(0, datetime.now(), {"proof": 6, "transactions": ""}, "")
-
-
-prime = create_genesis_block()
+    genesis_transactions = [TxnData(sender="NSA", recipient="satoshi", amount=1)]
+    genesis_data = BlockData(proof=7, transactions=genesis_transactions)
+    return Block(0, datetime.now(), genesis_data, "")
 
 
 def proof_of_work(prior_proof: int) -> int:
@@ -53,16 +58,9 @@ def proof_of_work(prior_proof: int) -> int:
     return incrementor
 
 
-def create_next_block(last_block: Block) -> Block:
-    prior_proof = last_block.data["proof"]
-    prior_txn = last_block.data["transactions"]
+def create_next_block(
+    last_block: Block, next_proof: int, updated_txns: list[TxnData]
+) -> Block:
+    new_data = BlockData(proof=next_proof, transactions=updated_txns)
 
-    next_proof = 0
-    next_txn = ""
-
-    data = {"proof": next_proof, "transactions": next_txn}
-
-    data_proof = proof_of_work(prior_proof)
-    return Block(
-        last_block.index + 1, datetime.now(), new_data, last_block.hash
-    )  # TODO: new block
+    return Block(last_block.index + 1, datetime.now(), new_data, last_block.hash)

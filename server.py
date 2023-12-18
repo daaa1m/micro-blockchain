@@ -1,26 +1,23 @@
+import json
 from typing import List, TypedDict
 
 from flask import Flask, request
 
 import blockchain as bc
+from blockchain import TxnData
 
-
-class TxnData(TypedDict):
-    sender: str
-    recipient: str
-    amount: int
-
+miner_address = "6969420-blaze-it"
 
 # initialise our node
 node = Flask(__name__)
 
-# this node stores a list of txns
-this_node_txns: List[TypedDict] = []  # TODO think about moving this inside the function
-miner_address = "random-miner-address-69-420"
 
-# initialise our SmolCoin
-SmolCoin_blockchain = [bc.create_genesis_block()]
-prior_block = SmolCoin_blockchain[0]
+# initialise our SmolCoin chain which is a list of Blocks
+prime = bc.create_genesis_block()
+SmolCoin = [prime]
+
+# this node stores a list of txns which starts with the first grant
+this_node_txns: List[TxnData] = prime.data["transactions"]
 
 
 @node.route("/txn", methods=["POST"])
@@ -43,12 +40,18 @@ def transaction() -> str:
     return "confirmed\n"
 
 
-@node.route("/mine", methods=["GET"])  # TODO: create the mine endpoint
-def mine():
-    last_block = SmolCoin_blockchain[len(SmolCoin_blockchain) - 1]
-    last_proof = last_block
+@node.route("/mine", methods=["GET"])
+def mine() -> str:
+    last_block = SmolCoin[-1]
+    proof = bc.proof_of_work(last_block.data["proof"])
 
-    return "Done mining\n"
+    this_node_txns.append(TxnData(sender="server", recipient=miner_address, amount=1))
+
+    mined_block = bc.create_next_block(last_block, proof, this_node_txns)
+
+    SmolCoin.append(mined_block)
+
+    return "mine succesful\n"
 
 
 node.run()
