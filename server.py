@@ -1,10 +1,9 @@
-import json
-from typing import List, TypedDict
+from typing import List
 
 from flask import Flask, request
 
 import blockchain as bc
-from blockchain import TxnData
+from blockchain import Block, TxnData
 
 miner_address = "6969420-blaze-it"
 
@@ -52,6 +51,11 @@ def mine() -> str:
     SmolCoin.append(mined_block)
 
     return "mine succesful\n"
+
+
+@node.route("blocks", methods=["GET"])
+def get_blocks() -> list[Block]:
+    pass
 
 
 node.run()
