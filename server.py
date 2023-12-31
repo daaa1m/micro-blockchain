@@ -1,3 +1,5 @@
+import json
+from datetime import datetime
 from typing import List
 
 from flask import Flask, request
@@ -36,6 +38,8 @@ def transaction() -> str:
     amount = new_txn["amount"]
     print(f"to {amount}")
 
+    print("node txn's are now\n", this_node_txns)
+
     return "confirmed\n"
 
 
@@ -50,12 +54,22 @@ def mine() -> str:
 
     SmolCoin.append(mined_block)
 
+    # print(vars(SmolCoin[-1]))
+
     return "mine succesful\n"
 
 
-@node.route("blocks", methods=["GET"])
-def get_blocks() -> list[Block]:
-    pass
+def datetime_serializer(obj) -> str:
+    if isinstance(obj, datetime):
+        return obj.isoformat()  # Convert datetime to ISO 8601 string
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+
+@node.route("/blocks", methods=["GET"])
+def get_blocks() -> str:
+    SmolCoin_dict = [block.__dict__ for block in SmolCoin]
+
+    return json.dumps(SmolCoin_dict, indent=4, default=datetime_serializer)
 
 
 node.run()

@@ -64,11 +64,3 @@ def create_next_block(
     new_data = BlockData(proof=next_proof, transactions=updated_txns)
 
     return Block(last_block.index + 1, datetime.now(), new_data, last_block.hash)
-
-
-def find_other_chains() -> list[list[Block]]:
-    pass
-
-
-def consensus() -> None:
-    other_chains = find_other_chains()
